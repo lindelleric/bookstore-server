@@ -1,0 +1,10 @@
+.env*
+static
+.idea/
+.vscode/
+node_modules/
+build/
+tmp/
+temp/
+*.sublime-workspace
+yarn-error.log
