@@ -4,6 +4,7 @@ import * as TypeORM from 'typeorm';
 import * as TypeGraphQL from 'type-graphql';
 import jwt from 'express-jwt';
 import path from 'path';
+import fs from 'fs';
 
 import queryComplexity from 'graphql-query-complexity';
 import { fieldConfigEstimator, simpleEstimator } from 'graphql-query-complexity';
@@ -18,14 +19,15 @@ import { authChecker } from './auth-checker';
 import { AuthResolver } from './resolvers/auth-resolver';
 import { User } from './entities/user';
 import { Book } from './entities/book';
-import { Collection } from './entities/collection';
 import { Author } from './entities/author';
 import { UserResolver } from './resolvers/user-resolver';
 import { BookResolver } from './resolvers/book-resolver';
 import { AuthorResolver } from './resolvers/author-resolver';
-import { CollectionResolver } from './resolvers/collection-resolver';
 import { BookIdentifiers } from './entities/book-identifiers';
 import { AuthorIdentifiers } from './entities/author-identifiers';
+import { Wishlist } from './entities/wishlist';
+import { WishlistResolver } from './resolvers/wishlist-resolver';
+import { getCover } from './helpers/cover';
 
 TypeGraphQL.useContainer(Container);
 TypeORM.useContainer(Container);
@@ -36,7 +38,6 @@ async function bootstrap() {
     let schema;
 
     console.log('bootstrap');
-    console.log(process.env.DB_NAME)
     try {
         // Move config to file?
         await TypeORM.createConnection({
@@ -44,13 +45,13 @@ async function bootstrap() {
             database: process.env.DB_NAME,
             username: process.env.DB_USER,
             password: process.env.DB_PASS,
-            port: parseInt(process.env.DB_PORT),
+            port: +process.env.DB_PORT,
             host: process.env.DB_HOST,
             entities: [
                 User,
                 Book,
                 Author,
-                Collection,
+                Wishlist,
                 BookIdentifiers,
                 AuthorIdentifiers
             ],
@@ -69,7 +70,7 @@ async function bootstrap() {
                 UserResolver,
                 BookResolver,
                 AuthorResolver,
-                CollectionResolver,
+                WishlistResolver,
                 AuthResolver
             ],
             authChecker
@@ -81,7 +82,7 @@ async function bootstrap() {
         schema,
         formatError,
         context: ({ req: {tokenData} }: any): Context => ({ tokenData })
-    } as any); // BC formaterror
+    } as any); // TODO: BC formaterror
 
     const app = Express();
     try {
@@ -112,6 +113,41 @@ async function bootstrap() {
     // app.use('/static/other', validateToken, Express.static(path.resolve(__dirname, '../static/other'), {
     //     setHeaders: (res) => res.contentType('application/zip')
     // }));
+
+    app.use('/book/cover', async (req, res) => {
+        const bookId = req.query.bookId;
+        let isbn = req.query.isbn;
+
+        if (!bookId && !isbn) {
+            res.status(403).send('Must provide bookId or isbn13');
+        }
+
+        if (bookId) {
+            const book = await Book.findOne(bookId);
+            isbn = book.isbn13;
+        }
+
+        const coverPath = path.join(__dirname, '..', `cache/covers/${isbn}.jpg`);
+        
+        console.log(coverPath);
+
+        if (!fs.existsSync(coverPath)) {
+            console.log('does not exist')
+            try {
+                await getCover(isbn);
+            } catch (error) {
+                console.error(error);
+                res.status(500).send('Could not get cover from source');
+            }
+        }
+
+        try {
+            res.sendFile(coverPath);
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Could not send file');
+        }
+    });
 
     apolloServer.applyMiddleware({ app });
 

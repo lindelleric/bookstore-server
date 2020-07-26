@@ -1,5 +1,6 @@
-import fetch from 'node-fetch';
+import fetch from './fetch';
 import { ObjectType, Field } from 'type-graphql';
+import fs from 'fs';
 
 import { BookDepositorySuggestionAPI } from './../common/types/book-depository';
 
@@ -17,11 +18,16 @@ export class BookDepositorySuggestion {
     @Field(type => [String])
     public contributors: string[];
 
+    @Field(type => String)
+    public coverUrl: string;
+
     public constructor(title: string, contributors: string, isbn13: string, format: string) {
         this.title = title;
         this.isbn13 = isbn13;
         this.format = format;
-        this.contributors = contributors.split(', ');
+        this.contributors = contributors.split(', ').filter((c) => !!c);       
+        
+        this.coverUrl = ''; // TODO: Set correct coverUrl "/book/cover?isbn=isbn" or bookId if the book is owned. This is to get cutom cover.
     }
 }
 

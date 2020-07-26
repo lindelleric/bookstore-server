@@ -2,7 +2,7 @@ import { Resolver, Query, Authorized, Ctx, Mutation, FieldResolver, Root } from 
 import { Context } from './../common/context.interface';
 
 import { User } from '../entities/user';
-import { Collection } from '../entities/collection';
+import { Book } from '../entities/book';
 
 @Resolver(of => User)
 export class UserResolver {
@@ -38,13 +38,13 @@ export class UserResolver {
     @Authorized()
     @Query(returns => [User])
     public users(): Promise<User[]> {
-        return User.find({ relations: ['collections'] });
+        return User.find();
     }
 
-    @FieldResolver(returns => [Collection])
-    async collections(@Root() user: User) {
+    @FieldResolver(returns => [Book])
+    async books(@Root() user: User) {
         const u = await User.findOne(user);
-        return await u.collections;
+        return await u.books;
     }
 }
 

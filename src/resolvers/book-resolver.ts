@@ -7,13 +7,12 @@ import { relative } from 'path';
 import { BookDepositorySuggestion, BookDepository } from '../helpers/bookdepository';
 import { Author } from '../entities/author';
 import { BookIdentifiers } from '../entities/book-identifiers';
-import { Collection } from '../entities/collection';
 import { OpenLibrary } from '../helpers/openlibrary';
 import { AuthorIdentifiers } from '../entities/author-identifiers';
+import { User } from '../entities/user';
 
 @Resolver(of => Book)
 export class BookResolver {
-    private readonly baseOptions = { relations: ['authors', 'identifiers'] };
 
     public constructor() { }
 
@@ -26,7 +25,7 @@ export class BookResolver {
         let book: Book;
 
         if (bookId) {
-            book = await Book.findOne(bookId, this.baseOptions);
+            book = await Book.findOne(bookId);
 
         } else if (isbn13) {
             // TODO: Query via relation to identifiers
@@ -39,6 +38,8 @@ export class BookResolver {
         if (!book) {
             throw new Error(`Book with id:${ bookId } or ISBN: ${ isbn13 }, cannot be found`);
         }
+
+        return book;
     }
 
     @Authorized()
@@ -72,52 +73,21 @@ export class BookResolver {
     public async addBook(
         @Arg('isbn') isbn: string
     ) {
-        const book = new Book();
+        const book = await Book.createFromIsbn(isbn);
+        const user = await User.findOne('925179bd-97d4-49e3-8fd1-d91c39f26461');
+        
+        user.books = Promise.resolve([...await user.books, book]);
 
-        const { title, identifiers: olIdentifiers, authors } = await OpenLibrary.getBook(isbn);
-
-        book.title = title;
-
-        const identifiers = new BookIdentifiers;
-        identifiers.isbn13 = olIdentifiers.isbn_13 ? olIdentifiers.isbn_13[0] : null;
-        identifiers.isbn10 = olIdentifiers.isbn_10 ? olIdentifiers.isbn_10[0] : null;
-        identifiers.openlibrary = olIdentifiers.openlibrary ? olIdentifiers.openlibrary[0] : null;
-
-        book.identifiers = identifiers;
-
-        const authorsToAdd = [];
-
-        console.log({authors});
-
-        for (const { name, url } of authors) {
-            const author = new Author();
-
-            const authorIdentifiers = new AuthorIdentifiers();
-            authorIdentifiers.openlibrary = url;
-
-            author.name = name;
-            author.identifiers = authorIdentifiers;
-
-            // await authorIdentifiers.save();
-
-            authorsToAdd.push(await author.save());
-
-            // (await book.authors).push(author);
-        }
-
-        console.log(authorsToAdd);
-        // book.authors = authorsToAdd;
-        book.authors = Promise.resolve(authorsToAdd);
-
-        console.log(book);
-        return await book.save();
+        await user.save();
+        
+        return book;
     }
 
-    @FieldResolver(returns => [Collection])
-    async collections(@Root() book: Book) {
-        const b = await Book.findOne(book);
-        return await b.collections;
-    }
+    // @FieldResolver(returns => [Collection])
+    // async collections(@Root() book: Book) {
+    //     const b = await Book.findOne(book);
+    //     return await b.collections;
+    // }
 
     @FieldResolver(returns => [Author])
     async authors(@Root() book: Book) {

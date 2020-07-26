@@ -5,48 +5,81 @@ export type OpenLibraryResponseAPI = {
 }
 
 export type OpenLibraryBookAPI = {
-    publishers: OpenLibraryPublisherAPI[];
-    pagination: string;
-    title: string;
-    url: string;
-    identifiers: OpenLibraryBookIdentifiersAPI;
-    cover: OpenLibraryBookCoverAPI;
-    subjects: OpenLibraryBookSubjectAPI[];
-    publish_date: string;
-    key: string;
-    authors: OpenLibraryAuthorAPI[];
-    publish_places: OpenLibraryPublishPlaceAPI[];
+	info_url: string;
+	bib_key: string;
+	preview_url: string;
+	thumbnail_url: string;
+	preview: 'noview' | string;
+	details: OpenLibraryBookDetailsAPI;
 }
 
-export type OpenLibraryPublisherAPI = {
-    name: string;
+export type OpenLibraryBookDetailsAPI = {
+	isbn_13?: string[];
+	isbn_10?: string[];
+	identifiers: OpenLibraryBookIdentifiersAPI;
+	covers: number[];
+	latest_revision: number;
+	revision: number;
+	source_records: string[];
+	title: string;
+	languages: OpenLibraryKeyAPI[];
+	publish_country: string;
+	publish_places: string[];
+	publish_date: string;
+	by_statement: string;
+	type: OpenLibraryKeyAPI[];
+	works: OpenLibraryKeyAPI[];
+	publishers: string[];
+	last_modified: OpenLibraryTypeValueAPI;
+	key: string;
+	authors: OpenLibraryNameKeyAPI[];
+	pagination: string;
+	created: OpenLibraryTypeValueAPI;
+	dewey_decimal_class: string[];
+	notes: OpenLibraryTypeValueAPI;
+	number_of_pages: number;
 }
 
 export type OpenLibraryBookIdentifiersAPI = {
-    isbn_13?: string[];
-    openlibrary?: string[];
-    [identifier: string]: string[];
+	openlibrary?: string[];
+	librarything?: string[];
+	[identifier: string]: string[];	
 }
 
-export type OpenLibraryBookCoverAPI = {
-    small: string;
-    medium: string;
-    large: string;
+export type OpenLibraryKeyAPI = {
+	key: string;
 }
 
-export type OpenLibraryBookSubjectAPI = {
-    name: string;
-    url: string;
+export type OpenLibraryTypeValueAPI = {
+	type: string;
+	value: string;
 }
 
-export type OpenLibraryAuthorAPI = {
-    name: string;
-    url: string;
+export type OpenLibraryNameKeyAPI = {
+	name: string;
+	key: string;
 }
 
-export type OpenLibraryPublishPlaceAPI = {
-    name: 'UK' | string;
+/**
+ {
+	"ISBN:9780099448792": {
+		"info_url": "https://openlibrary.org/books/OL15515237M/The_wind-up_bird_chronicle",
+		"bib_key": "ISBN:9780099448792",
+		"preview_url": "https://openlibrary.org/books/OL15515237M/The_wind-up_bird_chronicle",
+		"thumbnail_url": "https://covers.openlibrary.org/b/id/7998621-S.jpg",
+		"details": {
+			"isbn_10": [
+				"0099448793"
+			],
+			"publish_date": "2003",
+			"works": [{
+				"key": "/works/OL2625494W"
+			}]
+		},
+		"preview": "noview"
+	}
 }
+ */
 
 /**
  * 
@@ -92,3 +125,43 @@ export type OpenLibraryPublishPlaceAPI = {
 	}
 }
  */
+
+
+// export type OpenLibraryBookAPI = {
+// 	publishers: OpenLibraryPublisherAPI[];
+// 	pagination: string;
+// 	title: string;
+// 	url: string;
+// 	identifiers: OpenLibraryBookIdentifiersAPI;
+// 	cover: OpenLibraryBookCoverAPI;
+// 	subjects: OpenLibraryBookSubjectAPI[];
+// 	publish_date: string;
+// 	key: string;
+// 	authors: OpenLibraryAuthorAPI[];
+// 	publish_places: OpenLibraryPublishPlaceAPI[];
+// }
+
+// export type OpenLibraryPublisherAPI = {
+// 	name: string;
+// }
+
+
+// export type OpenLibraryBookCoverAPI = {
+// 	small: string;
+// 	medium: string;
+// 	large: string;
+// }
+
+// export type OpenLibraryBookSubjectAPI = {
+// 	name: string;
+// 	url: string;
+// }
+
+// export type OpenLibraryAuthorAPI = {
+// 	name: string;
+// 	url: string;
+// }
+
+// export type OpenLibraryPublishPlaceAPI = {
+// 	name: 'UK' | string;
+// }

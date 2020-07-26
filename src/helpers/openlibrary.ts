@@ -1,9 +1,9 @@
-import fetch from 'node-fetch';
+import fetch from './fetch';
 import { OpenLibraryResponseAPI } from '../common/types/open-library';
 
 export class OpenLibrary {
     private static baseUrl: string = 'https://openlibrary.org/api';
-    private static extraBits: string = '&format=json&jscmd=data';
+    private static extraBits: string = '&format=json&jscmd=details';
 
     public static async getBook(isbn: string) {
         // https://openlibrary.org/api/books?bibkeys=ISBN:9781784978518&format=json&jscmd=data

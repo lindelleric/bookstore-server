@@ -1,4 +1,4 @@
-# Tool for managing invitations and allowing invitees to set their RSVP status
+# Backend for Bookstore
 
 Steps to run this project:
 

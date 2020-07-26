@@ -8,3 +8,4 @@ tmp/
 temp/
 *.sublime-workspace
 yarn-error.log
+cache/
