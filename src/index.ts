@@ -114,7 +114,12 @@ async function bootstrap() {
     //     setHeaders: (res) => res.contentType('application/zip')
     // }));
 
-    app.use('/book/cover', async (req, res) => {
+    /**
+     * TODO:
+     *  - Move to separate file
+     *  - Add validateToken requestHandler
+     */
+    app.use('/book/cover', /* validateToken, compression(), */ async (req, res) => {
         const bookId = req.query.bookId;
         let isbn = req.query.isbn;
 
@@ -127,10 +132,8 @@ async function bootstrap() {
             isbn = book.isbn13;
         }
 
-        const coverPath = path.join(__dirname, '..', `cache/covers/${isbn}.jpg`);
+        const coverPath = path.resolve(__dirname, `../cache/covers/${isbn}.jpg`);
         
-        console.log(coverPath);
-
         if (!fs.existsSync(coverPath)) {
             console.log('does not exist')
             try {
@@ -155,22 +158,6 @@ async function bootstrap() {
         console.log("server started on http://localhost:4000/graphql");
     });
 }
-
-// try {
-//     thumb({
-//         // TODO: set paths in envs, which defautlts to docker-specific
-//         source: path.resolve(__dirname, '../static/images'),
-//         destination: path.resolve(__dirname, '../static/images/.thumbs'),
-//         ignore: true,
-//         skip: true,
-//         // concurrency: 4,
-//         height: 400,
-//         suffix: ''
-//     }).then(() => bootstrap())
-//       .catch((error) => console.log('error', error));
-// } catch (e) {
-//     console.log('Startup error:', e);
-// }
 
 bootstrap();
 
