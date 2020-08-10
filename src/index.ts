@@ -27,7 +27,6 @@ import { BookIdentifiers } from './entities/book-identifiers';
 import { AuthorIdentifiers } from './entities/author-identifiers';
 import { Wishlist } from './entities/wishlist';
 import { WishlistResolver } from './resolvers/wishlist-resolver';
-import { getCover } from './helpers/cover';
 
 TypeGraphQL.useContainer(Container);
 TypeORM.useContainer(Container);
@@ -134,18 +133,46 @@ async function bootstrap() {
 
         const coverPath = path.resolve(__dirname, `../cache/covers/${isbn}.jpg`);
         
-        if (!fs.existsSync(coverPath)) {
-            console.log('does not exist')
-            try {
-                await getCover(isbn);
-            } catch (error) {
-                console.error(error);
-                res.status(500).send('Could not get cover from source');
-            }
-        }
+        // if (!fs.existsSync(coverPath)) {
+        //     console.log('does not exist')
+        //     try {
+        //         await getCover(isbn);
+        //     } catch (error) {
+        //         console.error(error);
+        //         res.status(500).send('Could not get cover from source');
+        //     }
+        // }
 
         try {
             res.sendFile(coverPath);
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Could not send file');
+        }
+    });
+    
+    /**
+     * TODO:
+     *  - Move to separate file
+     *  - Add validateToken requestHandler
+     */
+    app.use('/book/thumbnail', /* validateToken, compression(), */ async (req, res) => {
+        const bookId = req.query.bookId;
+        let isbn = req.query.isbn;
+
+        if (!bookId && !isbn) {
+            res.status(403).send('Must provide bookId or isbn13');
+        }
+
+        if (bookId) {
+            const book = await Book.findOne(bookId);
+            isbn = book.isbn13;
+        }
+
+        const thumbnailPath = path.resolve(__dirname, `../cache/thumbnails/${isbn}.jpg`);
+        
+        try {
+            res.sendFile(thumbnailPath);
         } catch (error) {
             console.error(error);
             res.status(500).send('Could not send file');

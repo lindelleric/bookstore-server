@@ -15,49 +15,53 @@ import { User } from './user';
 @Entity()
 export class Book extends BaseEntity {
 
-    public static async createFromIsbn(isbn: string) {
-        const book = new Book();
+    // public static async createFromIsbn(isbn: string) {
+    //     const book = new Book();
 
-        const { details } = await OpenLibrary.getBook(isbn);
-        const { title, authors, identifiers, number_of_pages, languages, isbn_13, isbn_10, key, publish_date } = details;
+    //     const { details } = await OpenLibrary.getBook(isbn);
+    //     const { title, authors, identifiers, number_of_pages, languages, isbn_13, isbn_10, key, publish_date } = details;
 
-        book.title = title;
-        book.numberOfPages = number_of_pages;
-        book.publishDate = publish_date;
+    //     book.title = title;
+    //     book.numberOfPages = number_of_pages;
+    //     book.publishDate = publish_date;
 
-        book.identifiers = BookIdentifiers.createFromOpenLibrary({key: [key], ...identifiers});
+    //     book.identifiers = BookIdentifiers.createFromOpenLibrary({key: [key], ...identifiers});
 
-        if (isbn_13?.length) {
-            book.isbn13 = isbn_13[0] ?? isbn;
-        }
+    //     if (isbn_13?.length) {
+    //         book.isbn13 = isbn_13[0] ?? isbn;
+    //     }
         
-        if (isbn_10?.length) {
-            book.isbn10 = isbn_10[0] ?? null;
-        }
+    //     if (isbn_10?.length) {
+    //         book.isbn10 = isbn_10[0] ?? null;
+    //     }
 
-        const authorsToAdd = [];
+    //     const authorsToAdd = [];
 
-        for (const { name, key } of authors) {
-            const author = new Author();
+    //     for (const { name, key } of authors) {
+    //         const author = new Author();
 
-            const authorIdentifiers = new AuthorIdentifiers();
-            authorIdentifiers.openlibrary = key;
+    //         const authorIdentifiers = new AuthorIdentifiers();
+    //         authorIdentifiers.openlibrary = key;
 
-            author.name = name;
-            author.identifiers = authorIdentifiers;
+    //         author.name = name;
+    //         author.identifiers = authorIdentifiers;
 
-            authorsToAdd.push(author);
-        }
+    //         authorsToAdd.push(author);
+    //     }
 
-        book.authors = Promise.resolve(authorsToAdd);
+    //     book.authors = Promise.resolve(authorsToAdd);
 
-        console.log(book);
-        return await book.save();
-    }
+    //     console.log(book);
+    //     return await book.save();
+    // }
 
-    @Field()
+    @Field(Nullable) // For books that are not yet saved
     @PrimaryColumn()
     public id: string;
+
+    @Field()
+    @Column()
+    public googleId: string;
 
     @Field()
     @Column()
@@ -71,8 +75,8 @@ export class Book extends BaseEntity {
     @Column(Nullable)
     public isbn13?: string;
 
-    @Field(type => BookIdentifiers)
-    @OneToOne(type => BookIdentifiers, { eager: true, cascade: true })
+    @Field(type => BookIdentifiers, Nullable)
+    @OneToOne(type => BookIdentifiers, { eager: true, cascade: true, nullable: true })
     @JoinColumn()
     public identifiers: BookIdentifiers;
 
@@ -82,20 +86,24 @@ export class Book extends BaseEntity {
 
     @Field(Nullable)
     @Column(Nullable)
-    public numberOfPages?: number;
+    public pageCount?: number;
 
     @Field(Nullable)
     @Column(Nullable)
     public publishDate?: string;
 
-    @Field(type => [Author])
-    @ManyToMany(type => Author, author => author.books, { cascade: ['insert'] })
-    @JoinTable()
-    public authors: Promise<Author[]>;
+    @Field(Nullable)
+    @Column(Nullable)
+    public publisher?: string;
 
-    // @Field(type => [Collection], Nullable)
-    // @ManyToMany(type => Collection, collection => collection.books)
-    // public collections?: Promise<Collection[]>;
+    @Field(type => [String])
+    @Column('simple-array')
+    public authors: string[];
+
+    // @Field(type => [Author])
+    // @ManyToMany(type => Author, author => author.books, { cascade: ['insert'] })
+    // @JoinTable()
+    // public authors: Promise<Author[]>;
 
     @Field(type => [Wishlist], Nullable)
     @ManyToMany(type => Wishlist, wishlist => wishlist.books)
