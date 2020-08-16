@@ -1,9 +1,7 @@
-import { Entity, PrimaryColumn, Column, BeforeInsert, BaseEntity, ManyToMany, JoinColumn, OneToOne } from 'typeorm';
+import { Entity, Column, BaseEntity, ManyToMany, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
-import { v4 } from 'uuid';
 
 import { Book } from './book';
-import { Lazy } from '../common/lazy';
 import { Nullable } from '../common/nullable';
 import { AuthorIdentifiers } from './author-identifiers';
 
@@ -12,7 +10,7 @@ import { AuthorIdentifiers } from './author-identifiers';
 export class Author extends BaseEntity {
 
     @Field()
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn('uuid')
     public id: string;
 
     @Field()
@@ -31,9 +29,4 @@ export class Author extends BaseEntity {
     @Field(type => [Book])
     @ManyToMany(type => Book, book => book.authors)
     public books: Promise<Book[]>;
-
-    @BeforeInsert()
-    public init() {
-        this.id = v4();
-    }
 }

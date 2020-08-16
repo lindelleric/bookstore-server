@@ -14,6 +14,7 @@ import BookSuggestionHelper, { BookSuggestion } from '../helpers/book-suggestion
 import GoogleBooks from '../helpers/google-books';
 import BookHelper from '../helpers/book-helper';
 import CoverHelper from '../helpers/cover-helper';
+import { Wishlist } from '../entities/wishlist';
 
 @Resolver(of => Book)
 export class BookResolver {
@@ -24,28 +25,31 @@ export class BookResolver {
     @Query(returns => Book)
     public async book(
         @Arg('bookId', { nullable: true }) bookId?: string,
-        @Arg('ISBN', { nullable: true }) isbn?: string
+        @Arg('isbn', { nullable: true }) isbn?: string
     ) {
         let book: Book;
 
         if (bookId) {
             book = await Book.findOne(bookId);
         } else if (isbn) {
-
-            const googleVolume = await GoogleBooks.getBookViaIsbn(isbn);
-            book = BookHelper.parseBookFromGoogleVolume(googleVolume);
-
-            await CoverHelper.cacheCoverFromGoogle(book.isbn13, googleVolume.id);
-            // TODO: Query via relation to identifiers
-            // book = await Book.findOne({
-            //     where: { isbn13 },
-            //     ...this.baseOptions
-            // });
+            // TODO: Check if book with ISBN exists in DB
+            book = await Book.findOne({
+                where: {
+                    isbn13: isbn
+                }
+            });
         }
 
         if (!book) {
+            const googleVolume = await GoogleBooks.getBookViaIsbn(isbn);
+            book = BookHelper.parseBookFromGoogleVolume(googleVolume);
+        }
+        
+        if (!book) {
             throw new Error(`Book with id:${ bookId } or ISBN: ${ isbn }, cannot be found`);
         }
+
+        await CoverHelper.cacheCoverFromGoogle(book.isbn13, book.googleId);
 
         return book;
     }
@@ -53,17 +57,8 @@ export class BookResolver {
     @Authorized()
     @Query(returns => [Book])
     public books(): Promise<Book[]> {
-        // return Book.find({ loadEagerRelations: true, relations: ['authors'] });
+        // TODO: Only get books that are owned by the current user
         return Book.find();
-        // return Book.find({
-        //     join: {
-        //         alias: "book",
-        //         leftJoinAndSelect: {
-        //             authors: "book.authors",
-        //             identifiers: "book.identifiers"
-        //         }
-        //     }
-        // });
     }
 
     @Authorized()
@@ -71,17 +66,26 @@ export class BookResolver {
     public searchBook(
         @Arg('searchString') searchString: string
     ): Promise<BookSuggestion[]> {
+        // TODO: Check first if the book exists in database ad owned, wishlist or lowned/bowwowed
         return BookSuggestionHelper.getSuggestions(searchString);
     }
 
     @Authorized()
     @Mutation(returns => Book)
-    public async addBook(
+    public async markAsOwned(
         @Arg('isbn') isbn: string
     ) {
-        // const book = await Book.createFromIsbn(isbn);
-        // const user = await User.findOne('925179bd-97d4-49e3-8fd1-d91c39f26461');
+        // TODO: Get the logged in user
+        const user = await User.findOne('b605271d-e8fa-4d4c-95ea-f06d90b43fbc');
+
+        // TODO: Check first if the book exists in the database
+        const googleVolume = await GoogleBooks.getBookViaIsbn(isbn);
+        const book = BookHelper.parseBookFromGoogleVolume(googleVolume);
+
+        book.owner = Promise.resolve(user);
         
+        return book.save();
+
         // user.books = Promise.resolve([...await user.books, book]);
 
         // await user.save();
@@ -94,6 +98,18 @@ export class BookResolver {
     //     const b = await Book.findOne(book);
     //     return await b.authors;
     // }
+
+    @FieldResolver(returns => [Wishlist])
+    async wishlists(@Root() book: Book) {
+        const b = await Book.findOne(book.id);
+        return await b.wishlists;
+    }
+
+    @FieldResolver(returns => User)
+    async owner(@Root() book: Book) {
+        const b = await Book.findOne(book.id);
+        return await b.owner;
+    }
 
     @FieldResolver(returns => BookIdentifiers)
     async identifiers(@Root() book: Book) {

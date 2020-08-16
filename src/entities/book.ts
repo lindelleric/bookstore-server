@@ -1,14 +1,9 @@
-import { Entity, PrimaryColumn, Column, OneToMany, BeforeInsert, BaseEntity, ManyToMany, OneToOne, JoinColumn, JoinTable, ManyToOne } from 'typeorm';
-import { ObjectType, Field, ID } from 'type-graphql';
+import { Entity, Column, BaseEntity, ManyToMany, OneToOne, JoinColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { ObjectType, Field } from 'type-graphql';
 
-import { v4 } from 'uuid';
-
-import { Author } from './author';
 import { Wishlist } from './wishlist';
 import { Nullable } from '../common/nullable';
 import { BookIdentifiers } from './book-identifiers';
-import { OpenLibrary } from '../helpers/openlibrary';
-import { AuthorIdentifiers } from './author-identifiers';
 import { User } from './user';
 
 @ObjectType()
@@ -56,7 +51,7 @@ export class Book extends BaseEntity {
     // }
 
     @Field(Nullable) // For books that are not yet saved
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn('uuid')
     public id: string;
 
     @Field()
@@ -100,6 +95,10 @@ export class Book extends BaseEntity {
     @Column('simple-array')
     public authors: string[];
 
+    @Field(type => User, Nullable)
+    @ManyToOne(type => User, user => user.books, Nullable)
+    public owner: Promise<User>;
+
     // @Field(type => [Author])
     // @ManyToMany(type => Author, author => author.books, { cascade: ['insert'] })
     // @JoinTable()
@@ -108,9 +107,4 @@ export class Book extends BaseEntity {
     @Field(type => [Wishlist], Nullable)
     @ManyToMany(type => Wishlist, wishlist => wishlist.books)
     public wishlists?: Promise<Wishlist[]>;
-
-    @BeforeInsert()
-    public init() {
-        this.id = v4();
-    }
 }

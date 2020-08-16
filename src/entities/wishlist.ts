@@ -1,6 +1,5 @@
-import { Entity, PrimaryColumn, Column, BeforeInsert, BaseEntity, ManyToMany, JoinTable, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, BeforeInsert, BaseEntity, ManyToMany, JoinTable, ManyToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { ObjectType, Field, ID } from 'type-graphql';
-import { v4 } from 'uuid';
 
 import { Book } from './book';
 import { Nullable } from '../common/nullable';
@@ -11,7 +10,7 @@ import { User } from './user';
 export class Wishlist extends BaseEntity {
 
     @Field()
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn('uuid')
     public id: string;
 
     @Field()
@@ -37,7 +36,6 @@ export class Wishlist extends BaseEntity {
 
     @BeforeInsert()
     public init() {
-        this.id = v4();
         this.isDefault = this.isDefault ?? false;
     }
 }

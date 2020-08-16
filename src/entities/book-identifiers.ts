@@ -1,7 +1,5 @@
-import { Entity, PrimaryColumn, Column, OneToMany, BeforeInsert, BaseEntity, OneToOne, JoinTable } from 'typeorm';
+import { Entity, PrimaryColumn, Column, OneToMany, BeforeInsert, BaseEntity, OneToOne, JoinTable, PrimaryGeneratedColumn } from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
-
-import { v4 } from 'uuid';
 
 import { Nullable } from '../common/nullable';
 import { OpenLibraryBookIdentifiersAPI } from '../common/types/open-library';
@@ -22,7 +20,7 @@ export class BookIdentifiers extends BaseEntity {
     }
 
     // @Field()
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn('uuid')
     public id: string;
 
     @Field(Nullable)
@@ -32,9 +30,4 @@ export class BookIdentifiers extends BaseEntity {
     @Field(Nullable)
     @Column(Nullable)
     public goodreads?: string;
-
-    @BeforeInsert()
-    public init() {
-        this.id = v4();
-    }
 }

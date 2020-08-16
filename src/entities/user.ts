@@ -1,7 +1,5 @@
-import { Entity, PrimaryColumn, Column, BeforeInsert, BaseEntity, ManyToMany, ManyToOne, OneToMany, JoinColumn, JoinTable } from 'typeorm';
+import { Entity, PrimaryColumn, Column, BeforeInsert, BaseEntity, ManyToMany, ManyToOne, OneToMany, JoinColumn, JoinTable, PrimaryGeneratedColumn } from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
-import { v4 } from 'uuid';
-import { Lazy } from '../common/lazy';
 import { Nullable } from '../common/nullable';
 import { Wishlist } from './wishlist';
 import { Book } from './book';
@@ -11,7 +9,7 @@ import { Book } from './book';
 export class User extends BaseEntity {
 
     @Field()
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn('uuid')
     public id: string;
 
     @Field()
@@ -34,16 +32,10 @@ export class User extends BaseEntity {
     public wishlists?: Promise<Wishlist[]>;
 
     @Field(type => [Book], Nullable)
-    @ManyToMany(type => Book)
-    @JoinTable()
+    @OneToMany(type => Book, book => book.owner)
     public books?: Promise<Book[]>;
 
     // @Field(type => [Collection], Nullable)
     // @OneToMany(type => Collection, collection => collection.owner)
     // public collections?: Promise<Collection[]>;
-
-    @BeforeInsert()
-    public init() {
-        this.id = v4();
-    }
 }

@@ -1,6 +1,6 @@
 // Type definitions for Google Books API v1
 // Project: https://developers.google.com/books/docs/v1/getting_started
-// Definitions by: Bolisov Alexey
+// Definitions by: Bolisov Alexey: https://github.com/Bolisov/typings-gapi/tree/master/gapi.client.books-v1
 // Some modifications by Eric Lindell
 
 // /// <reference path="../gapi.client/gapi.client.d.ts" />
