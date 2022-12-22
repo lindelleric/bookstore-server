@@ -1,8 +1,9 @@
-import { Entity, PrimaryColumn, Column, BeforeInsert, BaseEntity, ManyToMany, ManyToOne, OneToMany, JoinColumn, JoinTable, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, BeforeInsert, BaseEntity, ManyToMany, ManyToOne, OneToMany, JoinColumn, JoinTable, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
 import { Nullable } from '../common/nullable';
-import { Wishlist } from './wishlist';
+import { List } from './list';
 import { Book } from './book';
+import { Wishlist } from './wishlist';
 
 @ObjectType()
 @Entity()
@@ -27,15 +28,16 @@ export class User extends BaseEntity {
     @Column()
     public lastName: string;
 
-    @Field(type => [Wishlist], Nullable)
-    @OneToMany(type => Wishlist, wishlist => wishlist.owner)
-    public wishlists?: Promise<Wishlist[]>;
+    @Field(type => Wishlist, Nullable)
+    @OneToOne(type => Wishlist, wishlist => wishlist.owner)
+    @JoinColumn()
+    public wishlist?: Promise<Wishlist>;
+
+    @Field(type => [List], Nullable)
+    @OneToMany(type => List, list => list.owner)
+    public lists?: Promise<List[]>;
 
     @Field(type => [Book], Nullable)
     @OneToMany(type => Book, book => book.owner)
     public books?: Promise<Book[]>;
-
-    // @Field(type => [Collection], Nullable)
-    // @OneToMany(type => Collection, collection => collection.owner)
-    // public collections?: Promise<Collection[]>;
 }

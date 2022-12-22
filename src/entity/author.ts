@@ -21,10 +21,10 @@ export class Author extends BaseEntity {
     @Column(Nullable)
     public description: string;
 
-    @Field(type => AuthorIdentifiers, Nullable)
-    @OneToOne(type => AuthorIdentifiers, { eager: true, cascade: true, nullable: true })
-    @JoinColumn()
-    public identifiers: AuthorIdentifiers;
+    // @Field(type => AuthorIdentifiers, Nullable)
+    // @OneToOne(type => AuthorIdentifiers, { eager: true, cascade: true, nullable: true })
+    // @JoinColumn()
+    // public identifiers: AuthorIdentifiers;
 
     @Field(type => [Book])
     @ManyToMany(type => Book, book => book.authors)

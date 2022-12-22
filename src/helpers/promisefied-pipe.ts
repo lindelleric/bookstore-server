@@ -21,7 +21,7 @@ export function promisifiedPipe(input, output) {
         input.on('error', errorEnding);
 
         function niceEnding() {
-            if (end()) resolve();
+            if (end()) resolve(void 0);
         }
 
         function errorEnding(error) {

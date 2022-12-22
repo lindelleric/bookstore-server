@@ -17,16 +17,21 @@ import { Context } from './common/context.interface';
 import { authChecker } from './auth-checker';
 
 import { AuthResolver } from './resolvers/auth-resolver';
-import { User } from './entities/user';
-import { Book } from './entities/book';
-import { Author } from './entities/author';
+import { User } from './entity/user';
+import { Book } from './entity/book';
+import { Author } from './entity/author';
 import { UserResolver } from './resolvers/user-resolver';
 import { BookResolver } from './resolvers/book-resolver';
 import { AuthorResolver } from './resolvers/author-resolver';
-import { BookIdentifiers } from './entities/book-identifiers';
-import { AuthorIdentifiers } from './entities/author-identifiers';
-import { Wishlist } from './entities/wishlist';
+import { BookIdentifiers } from './entity/book-identifiers';
+import { AuthorIdentifiers } from './entity/author-identifiers';
+import { Wishlist } from './entity/wishlist';
+import { ListResolver } from './resolvers/list-resolver';
+import { List } from './entity/list';
 import { WishlistResolver } from './resolvers/wishlist-resolver';
+import GoogleBooks from './helpers/google-books';
+import BookHelper from './helpers/book-helper';
+import CoverHelper from './helpers/cover-helper';
 
 TypeGraphQL.useContainer(Container);
 TypeORM.useContainer(Container);
@@ -51,8 +56,9 @@ async function bootstrap() {
                 Book,
                 Author,
                 Wishlist,
-                BookIdentifiers,
-                AuthorIdentifiers
+                List,
+                // BookIdentifiers,
+                // AuthorIdentifiers
             ],
             synchronize: true,
             logging: ['error', 'warn'],
@@ -69,6 +75,7 @@ async function bootstrap() {
                 UserResolver,
                 BookResolver,
                 AuthorResolver,
+                ListResolver,
                 WishlistResolver,
                 AuthResolver
             ],
@@ -120,15 +127,19 @@ async function bootstrap() {
      */
     app.use('/book/cover', /* validateToken, compression(), */ async (req, res) => {
         const bookId = req.query.bookId;
-        let isbn = req.query.isbn;
+        let isbn = req.query.isbn as string;
 
         if (!bookId && !isbn) {
             res.status(403).send('Must provide bookId or isbn13');
         }
-
+        
         if (bookId) {
-            const book = await Book.findOne(bookId);
+            const book = await Book.findOne(bookId.toString());
             isbn = book.isbn13;
+        } else {
+            const googleVolume = await GoogleBooks.getBookViaIsbn(isbn);
+            const book = BookHelper.parseBookFromGoogleVolume(googleVolume);
+            await CoverHelper.cacheCoverFromGoogle(book.isbn13, book.googleId);
         }
 
         const coverPath = path.resolve(__dirname, `../cache/covers/${isbn}.jpg`);
@@ -158,15 +169,19 @@ async function bootstrap() {
      */
     app.use('/book/thumbnail', /* validateToken, compression(), */ async (req, res) => {
         const bookId = req.query.bookId;
-        let isbn = req.query.isbn;
+        let isbn = req.query.isbn as string;
 
         if (!bookId && !isbn) {
             res.status(403).send('Must provide bookId or isbn13');
         }
 
         if (bookId) {
-            const book = await Book.findOne(bookId);
+            const book = await Book.findOne(bookId.toString());
             isbn = book.isbn13;
+        } else {
+            const googleVolume = await GoogleBooks.getBookViaIsbn(isbn);
+            const book = BookHelper.parseBookFromGoogleVolume(googleVolume);
+            await CoverHelper.cacheThumbnailFromGoogle(book.isbn13, book.googleId);
         }
 
         const thumbnailPath = path.resolve(__dirname, `../cache/thumbnails/${isbn}.jpg`);

@@ -2,19 +2,20 @@ import { Resolver, Query, Authorized, Arg, Root, Mutation, Ctx, Int, FieldResolv
 
 import discord from './../middlewares/discord';
 
-import { Book } from '../entities/book';
+import { Book } from '../entity/book';
 import { relative } from 'path';
 import { BookDepositorySuggestion, BookDepository } from '../helpers/bookdepository';
-import { Author } from '../entities/author';
-import { BookIdentifiers } from '../entities/book-identifiers';
+import { Author } from '../entity/author';
+import { BookIdentifiers } from '../entity/book-identifiers';
 import { OpenLibrary } from '../helpers/openlibrary';
-import { AuthorIdentifiers } from '../entities/author-identifiers';
-import { User } from '../entities/user';
+import { AuthorIdentifiers } from '../entity/author-identifiers';
+import { User } from '../entity/user';
 import BookSuggestionHelper, { BookSuggestion } from '../helpers/book-suggestion-helper';
 import GoogleBooks from '../helpers/google-books';
 import BookHelper from '../helpers/book-helper';
 import CoverHelper from '../helpers/cover-helper';
-import { Wishlist } from '../entities/wishlist';
+import { List } from '../entity/list';
+import { Wishlist } from '../entity/wishlist';
 
 @Resolver(of => Book)
 export class BookResolver {
@@ -32,7 +33,6 @@ export class BookResolver {
         if (bookId) {
             book = await Book.findOne(bookId);
         } else if (isbn) {
-            // TODO: Check if book with ISBN exists in DB
             book = await Book.findOne({
                 where: {
                     isbn13: isbn
@@ -49,7 +49,7 @@ export class BookResolver {
             throw new Error(`Book with id:${ bookId } or ISBN: ${ isbn }, cannot be found`);
         }
 
-        await CoverHelper.cacheCoverFromGoogle(book.isbn13, book.googleId);
+        // await CoverHelper.cacheCoverFromGoogle(book.isbn13, book.googleId);
 
         return book;
     }
@@ -66,6 +66,14 @@ export class BookResolver {
     public searchBook(
         @Arg('searchString') searchString: string
     ): Promise<BookSuggestion[]> {
+
+        Book.find({
+            where: {
+                title: searchString
+            }
+        })
+
+
         // TODO: Check first if the book exists in database ad owned, wishlist or lowned/bowwowed
         return BookSuggestionHelper.getSuggestions(searchString);
     }
@@ -105,16 +113,21 @@ export class BookResolver {
         return await b.wishlists;
     }
 
+    @FieldResolver(returns => [List])
+    async lists(@Root() book: Book) {
+        const b = await Book.findOne(book.id);
+        return await b.lists;
+    }
+
     @FieldResolver(returns => User)
     async owner(@Root() book: Book) {
         const b = await Book.findOne(book.id);
         return await b.owner;
     }
 
-    @FieldResolver(returns => BookIdentifiers)
-    async identifiers(@Root() book: Book) {
-        const b = await Book.findOne(book);
-        return b.identifiers;
-    }
+    // @FieldResolver(returns => BookIdentifiers)
+    // async identifiers(@Root() book: Book) {
+    //     const b = await Book.findOne(book);
+    //     return b.identifiers;
+    // }
 }
-

@@ -1,10 +1,11 @@
 import { Entity, Column, BaseEntity, ManyToMany, OneToOne, JoinColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
 
-import { Wishlist } from './wishlist';
+import { List } from './list';
 import { Nullable } from '../common/nullable';
 import { BookIdentifiers } from './book-identifiers';
 import { User } from './user';
+import { Wishlist } from './wishlist';
 
 @ObjectType()
 @Entity()
@@ -58,6 +59,14 @@ export class Book extends BaseEntity {
     @Column()
     public googleId: string;
 
+    @Field(Nullable)
+    @Column(Nullable)
+    public openlibraryId?: string;
+
+    @Field(Nullable)
+    @Column(Nullable)
+    public goodreadsId?: string;
+
     @Field()
     @Column()
     public title: string;
@@ -69,11 +78,6 @@ export class Book extends BaseEntity {
     @Field(Nullable)
     @Column(Nullable)
     public isbn13?: string;
-
-    @Field(type => BookIdentifiers, Nullable)
-    @OneToOne(type => BookIdentifiers, { eager: true, cascade: true, nullable: true })
-    @JoinColumn()
-    public identifiers: BookIdentifiers;
 
     @Field(Nullable)
     @Column(Nullable)
@@ -107,4 +111,8 @@ export class Book extends BaseEntity {
     @Field(type => [Wishlist], Nullable)
     @ManyToMany(type => Wishlist, wishlist => wishlist.books)
     public wishlists?: Promise<Wishlist[]>;
+
+    @Field(type => [List], Nullable)
+    @ManyToMany(type => List, list => list.books)
+    public lists?: Promise<List[]>;
 }

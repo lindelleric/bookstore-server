@@ -1,11 +1,7 @@
-.env*
-static
 .idea/
+cache
 .vscode/
 node_modules/
 build/
 tmp/
 temp/
-*.sublime-workspace
-yarn-error.log
-cache/

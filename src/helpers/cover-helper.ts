@@ -9,16 +9,19 @@ export default class CoverHelper {
         const coverPath = path.resolve(__dirname, `../../cache/thumbnails/${isbn}.jpg`);
         
         if (!fs.existsSync(coverPath)) {
-            return fetch(url)
-                .then((response) => promisifiedPipe(response.body, fs.createWriteStream(coverPath)));
+            return fetch(url).then((response) => promisifiedPipe(response.body, fs.createWriteStream(coverPath)));
         } else {
             return Promise.resolve();
         }
     }
 
-    public static cacheCoverFromGoogle(isbn: string, volumeId: string) {
-        const url = `https://books.google.com/books/content?id=${volumeId}&printsec=frontcover&img=1&zoom=4`;
+    public static cacheThumbnailFromGoogle(isbn: string, googleId: string) {
+        const url = `https://books.google.com/books/content?id=${googleId}&printsec=frontcover&img=1&zoom=5`;
+        return this.cacheTumbnail(isbn, url);
+    }
 
+    public static cacheCoverFromGoogle(isbn: string, googleId: string) {
+        const url = `https://books.google.com/books/content?id=${googleId}&printsec=frontcover&img=1&zoom=4`;
         return this.cacheCover(isbn, url);
     }
 
@@ -27,8 +30,7 @@ export default class CoverHelper {
         const coverPath = path.resolve(__dirname, `../../cache/covers/${isbn}.jpg`);
 
         if (!fs.existsSync(coverPath)) {
-            return fetch(url)
-                .then((response) => promisifiedPipe(response.body, fs.createWriteStream(coverPath)));
+            return fetch(url).then((response) => promisifiedPipe(response.body, fs.createWriteStream(coverPath)));
         } else {
             return Promise.resolve();
         }

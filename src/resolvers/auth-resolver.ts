@@ -8,7 +8,7 @@ import { AuthError } from './errors/AuthError';
 import discord from './../middlewares/discord';
 
 import { Context } from './../common/context.interface';
-import { User } from './../entities/user';
+import { User } from '../entity/user';
 
 @Resolver()
 export class AuthResolver {

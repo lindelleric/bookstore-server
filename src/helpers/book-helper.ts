@@ -1,5 +1,5 @@
 import { Volume } from "./../common/types/google-books";
-import { Book } from "./../entities/book";
+import { Book } from "../entity/book";
 
 export default class BookHelper {
     public static parseBookFromGoogleVolume(volume: Volume): Book {
@@ -9,7 +9,7 @@ export default class BookHelper {
 
         book.title = title;
         book.googleId = id;
-        book.isbn13 = industryIdentifiers.find(({type}) => type === 'ISBN_13')?.identifier;
+        book.isbn13 = industryIdentifiers.find(({ type }) => type === 'ISBN_13')?.identifier;
         book.isbn10 = industryIdentifiers.find(({ type }) => type === 'ISBN_10')?.identifier;
         book.pageCount = pageCount;
         book.publishDate = publishedDate;

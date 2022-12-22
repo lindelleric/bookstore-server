@@ -1,8 +1,10 @@
 import { Resolver, Query, Authorized, Ctx, Mutation, FieldResolver, Root } from 'type-graphql';
 import { Context } from './../common/context.interface';
 
-import { User } from '../entities/user';
-import { Book } from '../entities/book';
+import { User } from '../entity/user';
+import { Book } from '../entity/book';
+import { List } from '../entity/list';
+import { Wishlist } from '../entity/wishlist';
 
 @Resolver(of => User)
 export class UserResolver {
@@ -45,6 +47,18 @@ export class UserResolver {
     async books(@Root() user: User) {
         const u = await User.findOne(user);
         return await u.books;
+    }
+
+    @FieldResolver(returns => [List])
+    async lists(@Root() user: User) {
+        const u = await User.findOne(user);
+        return await u.lists;
+    }
+
+    @FieldResolver(returns => Wishlist)
+    async wishlist(@Root() user: User) {
+        const u = await User.findOne(user);
+        return await u.wishlist;
     }
 }
 

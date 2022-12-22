@@ -1,8 +1,14 @@
 {
+   "type": "postgres",
+   "host": "localhost",
+   "port": 5432,
+   "username": "eric",
+   "password": "",
+   "database": "bookstore",
    "synchronize": true,
    "logging": false,
    "entities": [
-      "src/entities/**/*.ts"
+      "src/entity/**/*.ts"
    ],
    "migrations": [
       "src/migration/**/*.ts"
@@ -11,7 +17,7 @@
       "src/subscriber/**/*.ts"
    ],
    "cli": {
-      "entitiesDir": "src/entities",
+      "entitiesDir": "src/entity",
       "migrationsDir": "src/migration",
       "subscribersDir": "src/subscriber"
    }

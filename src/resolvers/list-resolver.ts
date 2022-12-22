@@ -1,23 +1,23 @@
 import { Resolver, Query, Authorized, Arg, Mutation, FieldResolver, Root } from 'type-graphql';
 
+import { List } from '../entity/list';
 import { Book } from '../entity/book';
 import { User } from '../entity/user';
-import { Wishlist } from '../entity/wishlist';
 
-@Resolver(of => Wishlist)
-export class WishlistResolver {
+@Resolver(of => List)
+export class ListResolver {
     public constructor() { }
 
     @Authorized()
-    @Query(returns => Wishlist)
-    public wishlist(id: string) {
-        return Wishlist.findOne(id);
+    @Query(returns => List)
+    public list(id: string) {
+        return List.findOne(id);
     }
 
     @Authorized()
-    @Query(returns => [Wishlist])
-    public wishlists() {
-        return Wishlist.find();
+    @Query(returns => [List])
+    public lists() {
+        return List.find();
     }
 
     // @Authorized()
@@ -90,14 +90,14 @@ export class WishlistResolver {
     // }
 
     @FieldResolver(returns => [Book])
-    async books(@Root() wishlist: Wishlist) {
-        const w = await Wishlist.findOne(wishlist);
+    async books(@Root() list: List) {
+        const w = await List.findOne(list);
         return await w.books;
     }
 
     @FieldResolver(returns => User)
-    async owner(@Root() wishlist: Wishlist) {
-        const w = await Wishlist.findOne(wishlist);
+    async owner(@Root() list: List) {
+        const w = await List.findOne(list);
         return await w.owner;
     }
 }

@@ -1,8 +1,8 @@
 import { Resolver, Query, Authorized, FieldResolver, Root, Mutation, Arg } from 'type-graphql';
 
-import { Author } from '../entities/author';
-import { Book } from '../entities/book';
-import { AuthorIdentifiers } from '../entities/author-identifiers';
+import { Author } from '../entity/author';
+import { Book } from '../entity/book';
+import { AuthorIdentifiers } from '../entity/author-identifiers';
 
 @Resolver(of => Author)
 export class AuthorResolver {
@@ -32,11 +32,11 @@ export class AuthorResolver {
         return await b.books;
     }
 
-    @FieldResolver(returns => AuthorIdentifiers)
-    async identifiers(@Root() author: Author) {
-        const b = await Author.findOne(author);
-        return b.identifiers;
-    }
+    // @FieldResolver(returns => AuthorIdentifiers)
+    // async identifiers(@Root() author: Author) {
+    //     const b = await Author.findOne(author);
+    //     return b.identifiers;
+    // }
 
     // @Authorized(Roles.ADMIN)
     // @Mutation(returns => Book)

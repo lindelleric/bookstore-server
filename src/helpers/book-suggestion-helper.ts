@@ -48,11 +48,11 @@ export default class BookSuggestionHelper {
         searchResult.items = searchResult?.items?.filter(({ volumeInfo: { industryIdentifiers } }) => (industryIdentifiers || []).filter(({type}) => type === 'ISBN_13' || type === 'ISBN_10').length);
         searchResult?.items?.forEach((volume) => suggestions.push(BookSuggestion.parseFromGoogleVolume(volume)));
 
-        suggestions.forEach(async ({googleId, isbn}) => {
-            const url = `https://books.google.com/books/content?id=${googleId}&printsec=frontcover&img=1&zoom=5`;
-            console.log({url})
-            await CoverHelper.cacheTumbnail(isbn, url);
-        });
+        // suggestions.forEach(async ({googleId, isbn}) => {
+        //     const url = `https://books.google.com/books/content?id=${googleId}&printsec=frontcover&img=1&zoom=5`;
+        //     console.log({url})
+        //     await CoverHelper.cacheTumbnail(isbn, url);
+        // });
 
         return suggestions;
     }    
